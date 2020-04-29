@@ -6,9 +6,43 @@ import (
 
 	"github.com/go-chi/cors"	
 	"github.com/go-chi/chi"
-	
+	"./Servidor"
 		
 )
+
+var info = &servidor.InfoSerCompleta {
+	{
+		ID: "1",
+		Addres: "server1",
+		Asl_grade: "B",
+		Country: "US",
+		Owner:"Amazon.com, Inc.",
+	},
+	/*{
+		ID:"2",
+		Address: "server2",
+		Ssl_grade: "A+",
+		Country: "US",
+		Owner: "Amazon.com, Inc.",
+	},
+	{
+		ID:"3",
+		Address: "server3",
+		Ssl_grade: "A",
+		Country: "US",
+		Owner: "Amazon.com, Inc.",
+	},*/
+	Servers_changed: true,
+	Ssl_grade: "B",
+	Previous_ssl_grade: "A+",
+	Logo: "https://server.com/icon.png",
+	Title: "Title of the page",
+	Is_down: false,
+}
+
+func indexRoute(w http.ResponseWriter, r *http.Request){
+	fmt.Fprintf(w, "Bienvenido al mundo JuliLau")
+}
 
 func main(){
 	fmt.Println("Servidor iniciado en el puerto: 3000")
@@ -26,7 +60,7 @@ func main(){
 	//El controlador aplica la especificación CORS en la solicitud
 	//y agrega encabezados CORS relevantes según sea necesario.
 	r.Use(cors.Handler)
-
+	r.HandleFunc("/",indexRoute)
 	fmt.Println("Servidor iniciado en el puerto: 3000")
 	http.ListenAndServe(":3000", r)
 
@@ -37,9 +71,9 @@ func main(){
 	}
 	*/
 
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+	/*r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Tenemos respuesta en la ruta, sea bienvenido"))
-	})
+	})*/
 
 	//Necesito agregar la ruta con r.Get para obtener la información, pero debe ser un
 	//con un método de la lógica ya 
