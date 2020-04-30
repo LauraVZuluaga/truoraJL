@@ -6,9 +6,19 @@ import (
     "log"
     "net/http"
     "os"
+    "encoding/json"
 )
 
-func ObtenerInfoServidor(dominio string) {
+type Response struct{
+    Servidores []Servidor `json:"endpoints"`
+} 
+
+type Servidor struct {
+    Address string `json:"ipAddress"`
+    Ssl_grade string `json:"grade"`
+}
+
+func ObtenerInfoServidor(dominio string) Response {
     response, err := http.Get("https://api.ssllabs.com/api/v3/analyze?host="+dominio)
 
     if err != nil {
@@ -20,6 +30,8 @@ func ObtenerInfoServidor(dominio string) {
     if err != nil {
         log.Fatal(err)
     }
-    fmt.Println(string(responseData))
+    var responseObject Response
+    json.Unmarshal(responseData, &responseObject)
 
+    return responseObject
 }

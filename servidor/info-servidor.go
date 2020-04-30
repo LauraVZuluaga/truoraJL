@@ -4,30 +4,31 @@ import(
 	"net/http"
 	"../client"
 	"github.com/go-chi/chi"
+	"encoding/json"
 )
 
 //InfoServidor: Estructura para la información del servidor
 //Id para llave primaria en la base de datos
 
 type InfoServidor struct {
-	ID      string `json:ID`
-	Address string	`json:address`
-	Ssl_grade string `json:ssl_grade`
-	Country string	`json:country`
-	Owner   string	`json:owner`
+	ID      string `json:"ID"`
+	Address string	`json:"address"`
+	Ssl_grade string `json:"ssl_grade"`
+	Country string	`json:"country"`
+	Owner   string	`json:"owner"`
 }
 
 //InfoSerCompleta: Estructura para la información completa del servidor
 //asociada a la información parcial de la información anterior
 //(Se anida)
 type InfoSerCompleta struct {
-	Servers   []InfoServidor `json:servers`
-	Servers_changed   bool	`json:servers_changed`
-	Ssl_grade         string	`json:ssl_grade`
-	Previous_ssl_grade string	`json:PreviousSslGrade`
-	Logo             string	`json:logo`
-	Title            string	`json:title`
-	Is_down           bool	`json:is_down`
+	Servers   []InfoServidor `json:"servers"`
+	Servers_changed   bool	`json:"servers_changed"`
+	Ssl_grade         string	`json:"ssl_grade"`
+	Previous_ssl_grade string	`json:"PreviousSslGrade"`
+	Logo             string	`json:"logo"`
+	Title            string	`json:"title"`
+	Is_down           bool	`json:"is_down"`
 }
 
 type Servers []InfoServidor
@@ -66,5 +67,14 @@ var info = InfoSerCompleta {
 
 func GetServers(w http.ResponseWriter, r *http.Request){
 	vars := chi.URLParam(r,"dominio")
-	client.ObtenerInfoServidor(vars)
+	var responseObject = client.ObtenerInfoServidor(vars)
+	servers = nil
+	for i := 0; i < len(responseObject.Servidores); i++ {
+		var newInfoServidor InfoServidor
+		newInfoServidor.Address = responseObject.Servidores[i].Address
+		newInfoServidor.Ssl_grade = responseObject.Servidores[i].Ssl_grade
+		servers = append(servers, newInfoServidor)
+	}
+	
+	json.NewEncoder(w).Encode(servers)
 }
