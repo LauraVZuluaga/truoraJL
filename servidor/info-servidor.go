@@ -5,6 +5,7 @@ import(
 	"../client"
 	"github.com/go-chi/chi"
 	"encoding/json"
+	"../bd"
 )
 
 //InfoServidor: Estructura para la información del servidor
@@ -65,16 +66,16 @@ var info = InfoSerCompleta {
 	Is_down: false,
 }
 
+//Permite leer el dominio que se escribe como parametro en la ruta URL
+// de manera que con esté se pueda consultar la información de los servidores
+//que esta en las apis utilizadas
 func GetServers(w http.ResponseWriter, r *http.Request){
-	vars := chi.URLParam(r,"dominio")
-	var responseObject = client.ObtenerInfoServidor(vars)
-	servers = nil
-	for i := 0; i < len(responseObject.Servidores); i++ {
-		var newInfoServidor InfoServidor
-		newInfoServidor.Address = responseObject.Servidores[i].Address
-		newInfoServidor.Ssl_grade = responseObject.Servidores[i].Ssl_grade
-		servers = append(servers, newInfoServidor)
+	vars := chi.URLParam(r,"fecha")
+	buyers,err := client.ObtenerInfoServidor(vars)
+	if err != nil {
+		panic(err)
 	}
-	
-	json.NewEncoder(w).Encode(servers)
+	bd.SaveBuyers(buyers)
+
+	json.NewEncoder(w).Encode(buyers)
 }
