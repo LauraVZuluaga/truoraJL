@@ -70,12 +70,17 @@ var info = InfoSerCompleta {
 // de manera que con esté se pueda consultar la información de los servidores
 //que esta en las apis utilizadas
 func GetServers(w http.ResponseWriter, r *http.Request){
-	vars := chi.URLParam(r,"fecha")
-	buyers,err := client.ObtenerInfoServidor(vars)
+	date := chi.URLParam(r,"fecha")
+	
+	buyers,err := client.GetBuyers(date)
 	if err != nil {
 		panic(err)
 	}
+
+	products := client.GetProducts(date)
+
 	bd.SaveBuyers(buyers)
 
-	json.NewEncoder(w).Encode(buyers)
+
+	json.NewEncoder(w).Encode(products)
 }

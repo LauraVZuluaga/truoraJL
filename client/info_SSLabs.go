@@ -1,44 +1,87 @@
 package client
 
 import (
-    "fmt"
-    "net/http"
-    "os"
-    "io"
-    "encoding/json"
-    "crypto/tls"
-    "../models"
+  "fmt"
+  "net/http"
+  "os"
+  "io"
+  "encoding/json"
+  "encoding/csv"
+  "crypto/tls"
+  "../models"
+  "strconv"
 )
 
-func ObtenerInfoServidor(fecha string) ([]models.Buyer,error) {
-    // Create New http Transport
-    transCfg := &http.Transport{
-            TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // disable verify
-    }
-    // Create Http Client
-    client := &http.Client{Transport: transCfg}
-    response, err := client.Get("https://kqxty15mpg.execute-api.us-east-1.amazonaws.com​/buyers?date="+fecha)
+const url string = "https://kqxty15mpg.execute-api.us-east-1.amazonaws.com​";
 
-    if err != nil {
-        fmt.Print("ERROR: " + err.Error())
-        os.Exit(1)
-    }
-    defer response.Body.Close()
-    /*responseData, err := ioutil.ReadAll(response.Body)
-    if err != nil {
-        log.Fatal(err)
-    }
-    var responseObject Response
-    json.Unmarshal(responseData, &responseObject)
-    fmt.Println(responseObject)*/
+func requestServer(endpoint string, param string) (*http.Response) {
+  // Create New http Transport
+  transCfg := &http.Transport {
+      TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // disable verify
+  }
+  // Create Http Client
+  client := &http.Client{Transport: transCfg}
+  response, err := client.Get(url + endpoint + param)
+  if err != nil {
+      fmt.Print("ERROR: " + err.Error())
+      os.Exit(1)
+  }
+  return response
+}
 
-    return decodeBuyers(response.Body)
-    
+
+func GetBuyers(date string) ([]models.Buyer,error) {
+  response := requestServer("/buyers?date=", date)
+  defer response.Body.Close()
+  return decodeBuyers(response.Body)
+  /*responseData, err := ioutil.ReadAll(response.Body)
+  if err != nil {
+      log.Fatal(err)
+  }
+  var responseObject Response
+  json.Unmarshal(responseData, &responseObject)
+  fmt.Println(responseObject)*/
+}
+
+
+func GetProducts(date string) ([]models.Product) {
+  response := requestServer("/products?date=", date)
+  defer response.Body.Close()
+  return decodeProducts(response.Body)
+}
+
+func GetTransactions(date string) ([]models.Buyer,error) {
+  response := requestServer("/transactions?date=", date)
+  defer response.Body.Close()
+  return decodeBuyers(response.Body)
 }
 
 func decodeBuyers(r io.Reader) ([]models.Buyer, error) {
-	buyers := []models.Buyer{}
-	dec := json.NewDecoder(r)
-	err := dec.Decode(&buyers)
-	return buyers, err
+  buyers := []models.Buyer{}
+  dec := json.NewDecoder(r)
+  err := dec.Decode(&buyers)
+  return buyers, err
+}
+
+func decodeProducts(r io.Reader) ([]models.Product) {
+  var product models.Product
+  var products []models.Product
+  dec := csv.NewReader(r)
+  dec.Comma = (0x0027)
+  dec.LazyQuotes = true
+  records, err := dec.ReadAll()
+  if err != nil {
+    fmt.Println(err)
+    os.Exit(1)
+  }
+  fmt.Println(records)
+  for _, rec := range records {
+    product.ID = rec[0]
+    product.Name = rec[1]
+    product.Price, _ = strconv.Atoi(rec[2])
+
+    products = append(products, product)
+  }
+
+  return products
 }
