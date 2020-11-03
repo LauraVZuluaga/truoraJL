@@ -6,7 +6,7 @@ import (
 	"log"
 	"github.com/go-chi/cors"	
 	"github.com/go-chi/chi"
-	"./servidor"
+	"./server"
 )
 
 func indexRoute(w http.ResponseWriter, r *http.Request){
@@ -30,7 +30,8 @@ func main(){
 	//y agrega encabezados CORS relevantes según sea necesario.
 	r.Use(cors.Handler)
 	r.HandleFunc("/",indexRoute)
-	r.Get("/getServers/{fecha}",servidor.GetServers)
+	r.Get("/getServers/{fecha}",server.GetServers)
+	r.Get("/getBuyers",server.GetBuyers)
 	fmt.Println("Servidor iniciado en el puerto: 3000")
 	log.Fatal(http.ListenAndServe(":3000", r)) 
 

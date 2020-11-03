@@ -10,6 +10,9 @@ import (
   "crypto/tls"
   "../models"
   "strconv"
+  "io/ioutil"
+  "bytes"
+  "strings"
 )
 
 const url string = "https://kqxty15mpg.execute-api.us-east-1.amazonaws.com​";
@@ -50,10 +53,33 @@ func GetProducts(date string) ([]models.Product) {
   return decodeProducts(response.Body)
 }
 
-func GetTransactions(date string) ([]models.Buyer,error) {
+func GetTransactions(date string) ([]models.Transaction) {
   response := requestServer("/transactions?date=", date)
   defer response.Body.Close()
-  return decodeBuyers(response.Body)
+  return decodeTransactions(response.Body)
+}
+
+func decodeTransactions(r io.Reader) ([]models.Transaction) {
+  var transaction models.Transaction
+  var transactions []models.Transaction
+  responseData, err := ioutil.ReadAll(r)
+  if err != nil {
+      panic(err)
+  }
+  data := bytes.Split(responseData, []byte(string(0)))
+  
+  for i := 0; i*6+1 < len(data); i++ {
+
+    transaction.ID = string(data[i*6])
+    transaction.BuyerID = string(data[i*6+1])
+    transaction.Ip = string(data[i*6+2])
+    transaction.Device = string(data[i*6+3])
+    transaction.ProductIDs = strings.Split(string(data[i*6+4]),",") 
+    
+    transactions = append(transactions, transaction)
+  }
+
+  return transactions
 }
 
 func decodeBuyers(r io.Reader) ([]models.Buyer, error) {
@@ -74,7 +100,7 @@ func decodeProducts(r io.Reader) ([]models.Product) {
     fmt.Println(err)
     os.Exit(1)
   }
-  fmt.Println(records)
+  
   for _, rec := range records {
     product.ID = rec[0]
     product.Name = rec[1]
