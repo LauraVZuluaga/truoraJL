@@ -74,7 +74,8 @@ func decodeTransactions(r io.Reader) ([]models.Transaction) {
     transaction.BuyerID = string(data[i*6+1])
     transaction.Ip = string(data[i*6+2])
     transaction.Device = string(data[i*6+3])
-    transaction.ProductIDs = strings.Split(string(data[i*6+4]),",") 
+    productsIDs := strings.ReplaceAll(strings.ReplaceAll(string(data[i*6+4]),"(",","),")",",")
+    transaction.ProductIDs = strings.Split(productsIDs, ",") 
     
     transactions = append(transactions, transaction)
   }

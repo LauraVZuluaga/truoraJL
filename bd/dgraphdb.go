@@ -28,7 +28,24 @@ func SaveBuyers(buyers []models.Buyer) {
 
 	dgraphClient := newClient()
 
+	op := &api.Operation{}
+	op.Schema = `
+		id: string @index(exact) .
+		name: string .
+		age: int .
+
+		type Buyer {
+			id
+			name
+			age
+		}
+	`
+
 	ctx := context.Background()
+	err := dgraphClient.Alter(ctx, op)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	mu := &api.Mutation{
 		CommitNow: true,
@@ -52,8 +69,23 @@ func SaveBuyers(buyers []models.Buyer) {
 func SaveProducts(products []models.Product) {
 
 	dgraphClient := newClient()
+	op := &api.Operation{}
+	op.Schema = `
+		id: string @index(exact) .
+		name: string .
+		price: int .
 
+		type Product {
+			id
+			name
+			price
+		}
+	`
 	ctx := context.Background()
+	err := dgraphClient.Alter(ctx, op)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	mu := &api.Mutation{
 		CommitNow: true,
@@ -77,8 +109,27 @@ func SaveProducts(products []models.Product) {
 func SaveTransactions(transactions []models.Transaction) {
 
 	dgraphClient := newClient()
+	op := &api.Operation{}
+	op.Schema = `
+		id: string @index(exact) .
+		buyer_id: string @index(exact) .
+		ip: string @index(exact) .
+		device: string .
+		product_ids: [string] .
 
+		type Transaction {
+			id
+			buyer_id
+			ip
+			device
+			product_ids
+		}
+	`
 	ctx := context.Background()
+	err := dgraphClient.Alter(ctx, op)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	mu := &api.Mutation{
 		CommitNow: true,
